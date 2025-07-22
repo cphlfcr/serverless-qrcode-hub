@@ -61,36 +61,46 @@
         }
 
         /* 调整各列宽度 */
-        .table-responsive th:nth-child(1), /* 条目名称 */
+        .table-responsive th:nth-child(1), /* 门店名称 */
         .table-responsive td:nth-child(1) {
-            width: 15%;
+            width: 12%;
         }
 
-        .table-responsive th:nth-child(2), /* 短链名 */
+        .table-responsive th:nth-child(2), /* 美甲名称 */
         .table-responsive td:nth-child(2) {
             width: 12%;
         }
 
-        .table-responsive th:nth-child(3), /* 目标URL */
+        .table-responsive th:nth-child(3), /* 门店地址 */
         .table-responsive td:nth-child(3) {
-            width: 28%;
+            width: 15%;
+        }
+
+        .table-responsive th:nth-child(4), /* 短链名 */
+        .table-responsive td:nth-child(4) {
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(5), /* 目标URL */
+        .table-responsive td:nth-child(5) {
+            width: 20%;
             white-space: normal;
             overflow-wrap: break-word;
         }
 
-        .table-responsive th:nth-child(4), /* 有效日期 */
-        .table-responsive td:nth-child(4) {
-            width: 12%;
-        }
-
-        .table-responsive th:nth-child(5), /* 状态 */
-        .table-responsive td:nth-child(5) {
-            width: 13%;
-        }
-
-        .table-responsive th:nth-child(6), /* 操作 */
+        .table-responsive th:nth-child(6), /* 有效日期 */
         .table-responsive td:nth-child(6) {
-            width: 20%;
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(7), /* 状态 */
+        .table-responsive td:nth-child(7) {
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(8), /* 操作 */
+        .table-responsive td:nth-child(8) {
+            width: 11%;
         }
 
         /* 编辑模式下的行样式 */
@@ -126,7 +136,7 @@
 
             /* 表格基础样式调整 */
             .table-responsive table {
-                min-width: 800px; /* 确保在小屏幕上可以横向滚动 */
+                min-width: 1000px; /* 确保在小屏幕上可以横向滚动 */
                 font-size: 0.875rem; /* 稍微减小字体大小 */
             }
 
@@ -139,38 +149,50 @@
             }
 
             /* 优化各列宽度 */
-            .table-responsive th:nth-child(1), /* 条目名称 */
+            .table-responsive th:nth-child(1), /* 门店名称 */
             .table-responsive td:nth-child(1) {
-                min-width: 120px;
-                max-width: 150px;
+                min-width: 100px;
+                max-width: 120px;
             }
 
-            .table-responsive th:nth-child(2), /* 短链名 */
+            .table-responsive th:nth-child(2), /* 美甲名称 */
             .table-responsive td:nth-child(2) {
                 min-width: 100px;
                 max-width: 120px;
             }
 
-            .table-responsive th:nth-child(3), /* 目标URL */
+            .table-responsive th:nth-child(3), /* 门店地址 */
             .table-responsive td:nth-child(3) {
-                min-width: 200px;
-                max-width: 300px;
+                min-width: 120px;
+                max-width: 150px;
             }
 
-            .table-responsive th:nth-child(4), /* 有效日期 */
+            .table-responsive th:nth-child(4), /* 短链名 */
             .table-responsive td:nth-child(4) {
-                min-width: 100px;
-                max-width: 120px;
+                min-width: 80px;
+                max-width: 100px;
             }
 
-            .table-responsive th:nth-child(5), /* 状态 */
+            .table-responsive th:nth-child(5), /* 目标URL */
             .table-responsive td:nth-child(5) {
+                min-width: 150px;
+                max-width: 200px;
+            }
+
+            .table-responsive th:nth-child(6), /* 有效日期 */
+            .table-responsive td:nth-child(6) {
                 min-width: 100px;
                 max-width: 120px;
             }
 
-            .table-responsive th:nth-child(6), /* 操作 */
-            .table-responsive td:nth-child(6) {
+            .table-responsive th:nth-child(7), /* 状态 */
+            .table-responsive td:nth-child(7) {
+                min-width: 80px;
+                max-width: 100px;
+            }
+
+            .table-responsive th:nth-child(8), /* 操作 */
+            .table-responsive td:nth-child(8) {
                 min-width: 150px;
                 position: sticky;
                 right: 0;
@@ -397,10 +419,24 @@
                 <div class="card bg-base-200 p-4">
                     <div class="space-y-4">
                         <div>
-                            <label for="newName" class="label">
-                                <span class="label-text">条目名称</span>
+                            <label for="newStoreName" class="label">
+                                <span class="label-text">门店名称</span>
                             </label>
-                            <input type="text" id="newName" placeholder="条目名称，例:音乐群1"
+                            <input type="text" id="newStoreName" placeholder="门店名称，例:朝阳分店"
+                                class="input input-bordered w-full">
+                        </div>
+                        <div>
+                            <label for="newNailName" class="label">
+                                <span class="label-text">美甲名称</span>
+                            </label>
+                            <input type="text" id="newNailName" placeholder="美甲名称，例:夏日限定款"
+                                class="input input-bordered w-full">
+                        </div>
+                        <div>
+                            <label for="newStoreAddress" class="label">
+                                <span class="label-text">门店地址</span>
+                            </label>
+                            <input type="text" id="newStoreAddress" placeholder="门店地址，例:北京市朝阳区XX路XX号"
                                 class="input input-bordered w-full">
                         </div>
                         <div>
@@ -458,31 +494,42 @@
         <div class="card-body">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <h2 class="card-title text-xl">短链二维码管理</h2>
-                <div class="join shadow-lg">
-                    <button id="showAllBtn" class="join-item btn btn-sm btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        全部
-                    </button>
-                    <button id="showExpiringBtn" class="join-item btn btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        即将过期
-                    </button>
-                    <button id="showExpiredBtn" class="join-item btn btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        已过期
-                    </button>
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <div class="join shadow-lg">
+                        <button id="showAllBtn" class="join-item btn btn-sm btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            全部
+                        </button>
+                        <button id="showExpiringBtn" class="join-item btn btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            即将过期
+                        </button>
+                        <button id="showExpiredBtn" class="join-item btn btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            已过期
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="搜索门店、美甲名称..." 
+                            class="input input-bordered w-full md:w-64">
+                        <button id="searchBtn" class="btn btn-ghost btn-sm absolute right-0 top-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -522,11 +569,14 @@
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr>
-                            <th class="w-[15%]">条目名称</th>
-                            <th class="w-[12%]">短链名</th>
-                            <th class="w-[28%]">目标 URL</th>
-                            <th class="w-[15%]">有效日期</th>
-                            <th class="w-[30%]">状态</th>
+                            <th>门店名称</th>
+                            <th>美甲名称</th>
+                            <th>门店地址</th>
+                            <th>短链名</th>
+                            <th>目标 URL</th>
+                            <th>有效日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody id="mappingsTableBody">
@@ -695,6 +745,67 @@
                 
                 // 初始禁用微信二维码开关
                 document.getElementById('newIsWechat').disabled = true;
+
+                // 添加搜索功能
+                document.getElementById('searchBtn').addEventListener('click', performSearch);
+                document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+
+            // 搜索功能
+            async function performSearch() {
+                const searchTerm = document.getElementById('searchInput').value.trim();
+                if (!searchTerm) {
+                    await loadMappings();
+                    return;
+                }
+
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/search-mappings?q=${encodeURIComponent(searchTerm)}&page=${currentPage}&pageSize=${pageSize}`);
+                    
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('搜索失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    showAlert('搜索失败，请重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
             }
 
             // 添加全局错误处理
@@ -1011,7 +1122,9 @@
             }
 
             async function addMapping() {
-                const name = document.getElementById('newName').value.trim();
+                const storeName = document.getElementById('newStoreName').value.trim();
+                const nailName = document.getElementById('newNailName').value.trim();
+                const storeAddress = document.getElementById('newStoreAddress').value.trim();
                 const path = document.getElementById('newPath').value.trim();
                 const target = document.getElementById('newTarget').value.trim();
                 const expiry = document.getElementById('newExpiry').value;
@@ -1020,15 +1133,23 @@
                 const qrCodeData = document.getElementById('qrCodeData').value;
 
                 // 输入验证
-                if (!name) {
-                    showAlert('请输入条目名称');
+                if (!storeName) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!nailName) {
+                    showAlert('请输入美甲名称');
+                    return;
+                }
+                if (!storeAddress) {
+                    showAlert('请输入门店地址');
                     return;
                 }
                 if (!path) {
                     showAlert('请输入短链名');
                     return;
                 }
-                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                if (!/^[a-zA-Z0-9-_]+$/.test(path) && !isWechat) {
                     showAlert('短链名只能包含字母、数字、下划线和横线');
                     return;
                 }
@@ -1046,7 +1167,9 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            name, 
+                            storeName,
+                            nailName,
+                            storeAddress,
                             path, 
                             target, 
                             expiry,
@@ -1096,332 +1219,11 @@
 
                             if (!response.ok) {
                                 const data = await response.json();
-                                showAlert(data.message || data.error || '删除失败，请重试');
-                                return;
-                            }
-
-                            showAlert('删除成功', 'success');
-                            
-                            // 不再刷新整个页面，而是重新加载表格数据
-                            await loadMappings();
-                            
-                            // 如果当前在过期或即将过期的视图中，重新加载相应的数据
-                            const expiringBtn = document.getElementById('showExpiringBtn');
-                            const expiredBtn = document.getElementById('showExpiredBtn');
-                            
-                            if (expiringBtn.classList.contains('btn-warning')) {
-                                await loadExpiringMappings('expiring');
-                            } else if (expiredBtn.classList.contains('btn-error')) {
-                                await loadExpiringMappings('expired');
-                            }
-
-                            // 关闭模态框
-                            modal.close();
-                        } catch (error) {
-                            console.error('删除失败:', error);
-                            showAlert('删除失败，请检查网络连接后重试');
-                        } finally {
-                            // 清理事件监听器
-                            confirmBtn.removeEventListener('click', handleConfirm);
-                            resolve();
-                        }
-                    };
-
-                    // 添加确认按钮的点击事件
-                    confirmBtn.addEventListener('click', handleConfirm);
-
-                    // 显示模态框
-                    modal.showModal();
-                });
-            }
-
-            // 修改生成二维码的函数
-            function generateQRForMapping(url, newPath) {
-                const modal = document.getElementById('qr-modal');
-                const container = document.getElementById('qr-container');
-                const downloadBtn = document.getElementById('qr-download');
-                const urlInput = document.getElementById('qr-url');
-                const showLogoCheckbox = document.getElementById('qr-show-logo');
-                const dotsStyleSelect = document.getElementById('qr-dots-style');
-
-                // 清空之前的内容
-                container.innerHTML = '';
-
-                // 设置 URL 文本
-                urlInput.value = url;
-
-                // 从 localStorage 获取保存的设置
-                const savedShowLogo = localStorage.getItem('qr-show-logo');
-                const savedDotsStyle = localStorage.getItem('qr-dots-style');
-                
-                // 应用保存的设置
-                if (savedShowLogo !== null) {
-                    showLogoCheckbox.checked = savedShowLogo === 'true';
-                }
-                if (savedDotsStyle) {
-                    dotsStyleSelect.value = savedDotsStyle;
-                }
-
-                // 基础 QR 配置
-                const getQRConfig = (showLogo, dotsType) => ({
-                    width: 300,
-                    height: 300,
-                    type: 'canvas',
-                    data: url,
-                    dotsOptions: {
-                        color: "#000000",
-                        type: dotsType
-                    },
-                    cornersSquareOptions: {
-                        type: 'rounded'
-                    },
-                    cornersDotOptions: {
-                        type: 'rounded'
-                    },
-                    backgroundOptions: {
-                        color: "#FFFFFF"
-                    },
-                    qrOptions: {
-                        errorCorrectionLevel: 'H'
-                    },
-                    ...(showLogo ? {
-                        image: "/wechat.svg",
-                        imageOptions: {
-                            hideBackgroundDots: true,
-                            imageSize: 0.23,
-                            margin: 5
-                        }
-                    } : {})
-                });
-
-                // 创建新的二维码
-                let currentQRCode = new QRCodeStyling(getQRConfig(showLogoCheckbox.checked, dotsStyleSelect.value));
-                currentQRCode.append(container);
-
-                // 监听复选框和选择器变化
-                const updateQRCode = () => {
-                    container.classList.add('switching');
-
-                    setTimeout(() => {
-                        container.innerHTML = '';
-                        currentQRCode = new QRCodeStyling(getQRConfig(showLogoCheckbox.checked, dotsStyleSelect.value));
-                        currentQRCode.append(container);
-
-                        // 保存设置到 localStorage
-                        localStorage.setItem('qr-show-logo', showLogoCheckbox.checked);
-                        localStorage.setItem('qr-dots-style', dotsStyleSelect.value);
-
-                        requestAnimationFrame(() => {
-                            container.classList.remove('switching');
-                        });
-                    }, 200);
-                };
-
-                showLogoCheckbox.onchange = updateQRCode;
-                dotsStyleSelect.onchange = updateQRCode;
-
-                // 更新下载按钮点击事件
-                downloadBtn.onclick = () => {
-                    const timestamp = new Date().toISOString()
-                        .replace(/[:.]/g, '-')
-                        .replace('T', '_')
-                        .replace('Z', '');
-                    const fileName = `qr-${newPath}-${timestamp}`;
-                    currentQRCode.download({
-                        name: fileName,
-                        extension: 'png'
-                    });
-                };
-
-                // 显示模态框
-                modal.showModal();
-            }
-
-            // 修改创建短链二维码行的函数中的二维码按钮部分
-            function createMappingRow(path, mapping) {
-                const row = document.createElement('tr');
-                
-                // 保存完整的原始数据到 row 的 dataset
-                row.dataset.originalData = JSON.stringify({
-                    name: mapping.name || '',
-                    path: path,
-                    target: mapping.target,
-                    expiry: mapping.expiry || '',
-                    enabled: mapping.enabled,
-                    isWechat: mapping.isWechat,
-                    qrCodeData: mapping.qrCodeData
-                });
-
-                // 使用数组和 map 来优化单元格创建
-                const cellsData = [
-                    { text: mapping.name || '-', data: mapping.name || '-' },
-                    { text: path, data: path },
-                    { text: mapping.target, data: mapping.target },
-                    { text: mapping.expiry || '永久有效', data: mapping.expiry || '' }
-                ];
-
-                cellsData.forEach(({ text, data }, index) => {
-                    const cell = document.createElement('td');
-                    if (index === 2) { // 目标URL单元格
-                        cell.classList.add('whitespace-normal', 'break-words', 'max-w-xs');
-                        cell.style.wordBreak = 'break-all';
-                        cell.style.minWidth = '200px';
-                    }
-                    cell.textContent = text;
-                    cell.dataset.original = data;
-                    row.appendChild(cell);
-                });
-
-                // 添加状态列
-                const statusCell = document.createElement('td');
-                statusCell.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="badge ${mapping.enabled ? 'badge-success' : 'badge-error'}">
-                            ${mapping.enabled ? '启用' : '禁用'}
-                        </span>
-                        ${mapping.isWechat ? '<span class="badge badge-info">微信</span>' : ''}
-                    </div>
-                `;
-                row.appendChild(statusCell);
-
-                const actionsCell = document.createElement('td');
-                actionsCell.innerHTML = `
-                    <div class="join">
-                        <button class="join-item btn btn-warning btn-sm">编辑</button>
-                        <button class="join-item btn btn-error btn-sm">删除</button>
-                        <button class="join-item btn btn-info btn-sm">二维码</button>
-                    </div>
-                `;
-
-                // 添加事件监听器
-                const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
-                editBtn.onclick = () => toggleEditMode(row);
-                deleteBtn.onclick = (e) => {
-                    e.preventDefault();
-                    deleteMapping(path);
-                };
-                qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + path, path);
-
-                row.appendChild(actionsCell);
-                return row;
-            }
-
-            // 添加切换编辑模式的函数
-            async function toggleEditMode(row) {
-                const isEditing = row.classList.toggle('editing');
-                const cells = row.cells;
-                const originalData = JSON.parse(row.dataset.originalData);
-
-                if (isEditing) {
-                    try {
-                        // 获取当前行的完整数据
-                        const response = await fetch(`/api/mapping?path=${originalData.path}`);
-                        if (!response.ok) {
-                            throw new Error('获取数据失败');
-                        }
-                        const mappingData = await response.json();
-
-                        // 切换到编辑模式
-                        cells[0].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.name || ''}">`;
-                        cells[1].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.path}">`;
-                        cells[2].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full h-24" style="resize:none; word-break:break-all;">${mappingData.target}</textarea>`;
-                        cells[3].innerHTML = `<input type="date" class="input input-bordered input-sm w-full" value="${mappingData.expiry || ''}">`;
-                        
-                        // 状态切换
-                        cells[4].innerHTML = `
-                            <div class="flex flex-col gap-2">
-                                <label class="cursor-pointer label justify-start gap-2">
-                                    <input type="checkbox" class="toggle toggle-primary toggle-sm" ${mappingData.enabled ? 'checked' : ''}>
-                                    <span class="label-text">启用</span>
-                                </label>
-                                <label class="cursor-pointer label justify-start gap-2">
-                                    <input type="checkbox" class="toggle toggle-primary toggle-sm" ${mappingData.isWechat ? 'checked' : ''}>
-                                    <span class="label-text">微信</span>
-                                </label>
-                            </div>
-                        `;
-
-                        // 修改按钮组
-                        const actionsCell = cells[5];
-                        actionsCell.innerHTML = `
-                            <div class="join">
-                                <button class="join-item btn btn-success btn-sm">保存</button>
-                                <button class="join-item btn btn-primary btn-sm">取消</button>
-                                <button class="join-item btn btn-info btn-sm">二维码</button>
-                            </div>
-                        `;
-
-                        // 重新绑定事件监听器
-                        const [saveBtn, cancelBtn, qrBtn] = actionsCell.querySelectorAll('button');
-                        saveBtn.onclick = () => saveEdit(row);
-                        cancelBtn.onclick = () => restoreRow(row);
-                        qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path);
-                    } catch (error) {
-                        console.error('获取数据失败:', error);
-                        showAlert('获取数据失败，请重试');
-                        row.classList.remove('editing');
-                    }
-                }
-            }
-
-            async function saveEdit(row) {
-                const cells = row.cells;
-                const rowOriginalData = JSON.parse(row.dataset.originalData);
-
-                const newName = cells[0].querySelector('input').value;
-                const newPath = cells[1].querySelector('input').value;
-                const newTarget = cells[2].querySelector('textarea').value;
-                const newExpiry = cells[3].querySelector('input').value;
-                const enabledToggle = cells[4].querySelector('input[type="checkbox"]');
-                const isWechatToggle = cells[4].querySelectorAll('input[type="checkbox"]')[1];
-                const newEnabled = enabledToggle.checked;
-                const newIsWechat = isWechatToggle ? isWechatToggle.checked : false;
-
-                // 检查是否有任何修改
-                const hasChanges =
-                    newName !== rowOriginalData.name ||
-                    newPath !== rowOriginalData.path ||
-                    newTarget !== rowOriginalData.target ||
-                    newExpiry !== rowOriginalData.expiry ||
-                    newEnabled !== rowOriginalData.enabled ||
-                    (isWechatToggle && newIsWechat !== rowOriginalData.isWechat);
-
-                if (!hasChanges) {
-                    restoreRow(row);
-                    return;
-                }
-
-                try {
-                    // 获取原有数据
-                    const response = await fetch(`/api/mapping?path=${rowOriginalData.path}`);
-                    if (!response.ok) {
-                        throw new Error('获取原有数据失败');
-                    }
-                    const serverData = await response.json();
-
-                    // 保存更改
-                    const updateResponse = await fetch('/api/mapping', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            originalPath: rowOriginalData.path,
-                            path: newPath,
-                            target: newTarget,
-                            name: newName,
-                            expiry: newExpiry || null,
-                            enabled: newEnabled,
-                            isWechat: newIsWechat,
-                            qrCodeData: serverData.qrCodeData // 使用服务器返回的原始二维码数据
-                        })
-                    });
-
-                    if (!updateResponse.ok) {
-                        const data = await updateResponse.json();
-                        showAlert(data.message || data.error || '更新失败，请重试');
+                        showAlert(data.message || data.error || '删除失败，请重试');
                         return;
                     }
 
-                    showAlert('更新成功', 'success');
+                    showAlert('删除成功', 'success');
                     
                     // 不再刷新整个页面，而是重新加载表格数据
                     await loadMappings();
@@ -1435,373 +1237,611 @@
                     } else if (expiredBtn.classList.contains('btn-error')) {
                         await loadExpiringMappings('expired');
                     }
+
+                    // 关闭模态框
+                    modal.close();
                 } catch (error) {
-                    console.error('更新失败:', error);
-                    showAlert('更新失败，请检查网络连接后重试');
+                    console.error('删除失败:', error);
+                    showAlert('删除失败，请检查网络连接后重试');
+                } finally {
+                    // 清理事件监听器
+                    confirmBtn.removeEventListener('click', handleConfirm);
+                    resolve();
                 }
+            };
+
+            // 添加确认按钮的点击事件
+            confirmBtn.addEventListener('click', handleConfirm);
+
+            // 显示模态框
+            modal.showModal();
+        });
+    }
+
+    // 修改生成二维码的函数
+    function generateQRForMapping(url, newPath) {
+        const modal = document.getElementById('qr-modal');
+        const container = document.getElementById('qr-container');
+        const downloadBtn = document.getElementById('qr-download');
+        const urlInput = document.getElementById('qr-url');
+        const showLogoCheckbox = document.getElementById('qr-show-logo');
+        const dotsStyleSelect = document.getElementById('qr-dots-style');
+
+        // 清空之前的内容
+        container.innerHTML = '';
+
+        // 设置 URL 文本
+        urlInput.value = url;
+
+        // 从 localStorage 获取保存的设置
+        const savedShowLogo = localStorage.getItem('qr-show-logo');
+        const savedDotsStyle = localStorage.getItem('qr-dots-style');
+        
+        // 应用保存的设置
+        if (savedShowLogo !== null) {
+            showLogoCheckbox.checked = savedShowLogo === 'true';
+        }
+        if (savedDotsStyle) {
+            dotsStyleSelect.value = savedDotsStyle;
+        }
+
+        // 基础 QR 配置
+        const getQRConfig = (showLogo, dotsType) => ({
+            width: 300,
+            height: 300,
+            type: 'canvas',
+            data: url,
+            dotsOptions: {
+                color: "#000000",
+                type: dotsType
+            },
+            cornersSquareOptions: {
+                type: 'rounded'
+            },
+            cornersDotOptions: {
+                type: 'rounded'
+            },
+            backgroundOptions: {
+                color: "#FFFFFF"
+            },
+            qrOptions: {
+                errorCorrectionLevel: 'H'
+            },
+            ...(showLogo ? {
+                image: "/wechat.svg",
+                imageOptions: {
+                    hideBackgroundDots: true,
+                    imageSize: 0.23,
+                    margin: 5
+                }
+            } : {})
+        });
+
+        // 创建新的二维码
+        let currentQRCode = new QRCodeStyling(getQRConfig(showLogoCheckbox.checked, dotsStyleSelect.value));
+        currentQRCode.append(container);
+
+        // 监听复选框和选择器变化
+        const updateQRCode = () => {
+            container.classList.add('switching');
+
+            setTimeout(() => {
+                container.innerHTML = '';
+                currentQRCode = new QRCodeStyling(getQRConfig(showLogoCheckbox.checked, dotsStyleSelect.value));
+                currentQRCode.append(container);
+
+                // 保存设置到 localStorage
+                localStorage.setItem('qr-show-logo', showLogoCheckbox.checked);
+                localStorage.setItem('qr-dots-style', dotsStyleSelect.value);
+
+                requestAnimationFrame(() => {
+                    container.classList.remove('switching');
+                });
+            }, 200);
+        };
+
+        showLogoCheckbox.onchange = updateQRCode;
+        dotsStyleSelect.onchange = updateQRCode;
+
+        // 更新下载按钮点击事件
+        downloadBtn.onclick = () => {
+            const timestamp = new Date().toISOString()
+                .replace(/[:.]/g, '-')
+                .replace('T', '_')
+                .replace('Z', '');
+            const fileName = `qr-${newPath}-${timestamp}`;
+            currentQRCode.download({
+                name: fileName,
+                extension: 'png'
+            });
+        };
+
+        // 显示模态框
+        modal.showModal();
+    }
+
+    // 修改创建短链二维码行的函数中的二维码按钮部分
+    function createMappingRow(path, mapping) {
+        const row = document.createElement('tr');
+        
+        // 保存完整的原始数据到 row 的 dataset
+        row.dataset.originalData = JSON.stringify({
+            storeName: mapping.storeName || '',
+            nailName: mapping.nailName || '',
+            storeAddress: mapping.storeAddress || '',
+            path: path,
+            target: mapping.target,
+            expiry: mapping.expiry || '',
+            enabled: mapping.enabled,
+            isWechat: mapping.isWechat,
+            qrCodeData: mapping.qrCodeData
+        });
+
+        // 使用数组和 map 来优化单元格创建
+        const cellsData = [
+            { text: mapping.storeName || '-', data: mapping.storeName || '-' },
+            { text: mapping.nailName || '-', data: mapping.nailName || '-' },
+            { text: mapping.storeAddress || '-', data: mapping.storeAddress || '-' },
+            { text: path, data: path },
+            { text: mapping.target, data: mapping.target },
+            { text: mapping.expiry || '永久有效', data: mapping.expiry || '' }
+        ];
+
+        cellsData.forEach(({ text, data }, index) => {
+            const cell = document.createElement('td');
+            if (index === 4) { // 目标URL单元格
+                cell.classList.add('whitespace-normal', 'break-words', 'max-w-xs');
+                cell.style.wordBreak = 'break-all';
+                cell.style.minWidth = '200px';
             }
+            cell.textContent = text;
+            cell.dataset.original = data;
+            row.appendChild(cell);
+        });
 
-            function restoreRow(row) {
-                const cells = row.cells;
-                const originalData = JSON.parse(row.dataset.originalData);
+        // 添加状态列
+        const statusCell = document.createElement('td');
+        statusCell.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="badge ${mapping.enabled ? 'badge-success' : 'badge-error'}">
+                    ${mapping.enabled ? '启用' : '禁用'}
+                </span>
+                ${mapping.isWechat ? '<span class="badge badge-info">微信</span>' : ''}
+            </div>
+        `;
+        row.appendChild(statusCell);
 
-                // 恢复各个单元格的内容
-                cells[0].textContent = originalData.name || '-';
-                cells[1].textContent = originalData.path;
-                cells[2].textContent = originalData.target;
-                cells[3].textContent = originalData.expiry || '永久有效';
+        const actionsCell = document.createElement('td');
+        actionsCell.innerHTML = `
+            <div class="join">
+                <button class="join-item btn btn-warning btn-sm">编辑</button>
+                <button class="join-item btn btn-error btn-sm">删除</button>
+                <button class="join-item btn btn-info btn-sm">二维码</button>
+            </div>
+        `;
 
-                // 恢复状态列
-                cells[4].innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="badge ${originalData.enabled ? 'badge-success' : 'badge-error'}">
-                            ${originalData.enabled ? '启用' : '禁用'}
-                        </span>
-                        ${originalData.isWechat ? '<span class="badge badge-info">微信</span>' : ''}
+        // 添加事件监听器
+        const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
+        editBtn.onclick = () => toggleEditMode(row);
+        deleteBtn.onclick = (e) => {
+            e.preventDefault();
+            deleteMapping(path);
+        };
+        qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + path, path);
+
+        row.appendChild(actionsCell);
+        return row;
+    }
+
+    // 添加切换编辑模式的函数
+    async function toggleEditMode(row) {
+        const isEditing = row.classList.toggle('editing');
+        const cells = row.cells;
+        const originalData = JSON.parse(row.dataset.originalData);
+
+        if (isEditing) {
+            try {
+                // 获取当前行的完整数据
+                const response = await fetch(`/api/mapping?path=${originalData.path}`);
+                if (!response.ok) {
+                    throw new Error('获取数据失败');
+                }
+                const mappingData = await response.json();
+
+                // 切换到编辑模式
+                cells[0].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.storeName || ''}">`;
+                cells[1].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.nailName || ''}">`;
+                cells[2].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.storeAddress || ''}">`;
+                cells[3].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.path}">`;
+                cells[4].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full h-24" style="resize:none; word-break:break-all;">${mappingData.target}</textarea>`;
+                cells[5].innerHTML = `<input type="date" class="input input-bordered input-sm w-full" value="${mappingData.expiry || ''}">`;
+                
+                // 状态切换
+                cells[6].innerHTML = `
+                    <div class="flex flex-col gap-2">
+                        <label class="cursor-pointer label justify-start gap-2">
+                            <input type="checkbox" class="toggle toggle-primary toggle-sm" ${mappingData.enabled ? 'checked' : ''}>
+                            <span class="label-text">启用</span>
+                        </label>
+                        <label class="cursor-pointer label justify-start gap-2">
+                            <input type="checkbox" class="toggle toggle-primary toggle-sm" ${mappingData.isWechat ? 'checked' : ''}>
+                            <span class="label-text">微信</span>
+                        </label>
                     </div>
                 `;
 
-                // 恢复按钮组
-                const actionsCell = cells[5];
+                // 修改按钮组
+                const actionsCell = cells[7];
                 actionsCell.innerHTML = `
                     <div class="join">
-                        <button class="join-item btn btn-warning btn-sm">编辑</button>
-                        <button class="join-item btn btn-error btn-sm">删除</button>
+                        <button class="join-item btn btn-success btn-sm">保存</button>
+                        <button class="join-item btn btn-primary btn-sm">取消</button>
                         <button class="join-item btn btn-info btn-sm">二维码</button>
                     </div>
                 `;
 
                 // 重新绑定事件监听器
-                const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
-                editBtn.onclick = () => toggleEditMode(row);
-                deleteBtn.onclick = () => deleteMapping(originalData.path);
+                const [saveBtn, cancelBtn, qrBtn] = actionsCell.querySelectorAll('button');
+                saveBtn.onclick = () => saveEdit(row);
+                cancelBtn.onclick = () => restoreRow(row);
                 qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path);
-
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                showAlert('获取数据失败，请重试');
                 row.classList.remove('editing');
             }
+        }
+    }
 
-            async function updateMapping(mapping) {
-                try {
-                    const response = await fetch('/api/mapping', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(mapping)
-                    });
+    async function saveEdit(row) {
+        const cells = row.cells;
+        const rowOriginalData = JSON.parse(row.dataset.originalData);
 
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return;
-                    }
+        const newStoreName = cells[0].querySelector('input').value;
+        const newNailName = cells[1].querySelector('input').value;
+        const newStoreAddress = cells[2].querySelector('input').value;
+        const newPath = cells[3].querySelector('input').value;
+        const newTarget = cells[4].querySelector('textarea').value;
+        const newExpiry = cells[5].querySelector('input').value;
+        const enabledToggle = cells[6].querySelector('input[type="checkbox"]');
+        const isWechatToggle = cells[6].querySelectorAll('input[type="checkbox"]')[1];
+        const newEnabled = enabledToggle.checked;
+        const newIsWechat = isWechatToggle ? isWechatToggle.checked : false;
 
-                    if (!response.ok) {
-                        const data = await response.json();
-                        showAlert(data.message || data.error || '更新失败，请重试');
-                        return;
-                    }
+        // 检查是否有任何修改
+        const hasChanges =
+            newStoreName !== rowOriginalData.storeName ||
+            newNailName !== rowOriginalData.nailName ||
+            newStoreAddress !== rowOriginalData.storeAddress ||
+            newPath !== rowOriginalData.path ||
+            newTarget !== rowOriginalData.target ||
+            newExpiry !== rowOriginalData.expiry ||
+            newEnabled !== rowOriginalData.enabled ||
+            (isWechatToggle && newIsWechat !== rowOriginalData.isWechat);
 
-                    showAlert('更新成功', 'success');
-                    location.reload();
-                } catch (error) {
-                    console.error('更新短链二维码失败:', error);
-                    showAlert('更新失败，请检查网络连接后重试');
-                }
+        if (!hasChanges) {
+            restoreRow(row);
+            return;
+        }
+
+        try {
+            // 获取原有数据
+            const response = await fetch(`/api/mapping?path=${rowOriginalData.path}`);
+            if (!response.ok) {
+                throw new Error('获取原有数据失败');
             }
+            const serverData = await response.json();
 
-            // 修改 toggleTheme 函数
-            function toggleTheme() {
-                const html = document.documentElement;
-                const currentTheme = localStorage.getItem('theme') || 'system';
-                let newTheme;
-
-                // 循环切换：system -> light -> dark -> system
-                switch (currentTheme) {
-                    case 'system':
-                        newTheme = 'light';
-                        break;
-                    case 'light':
-                        newTheme = 'dark';
-                        break;
-                    case 'dark':
-                        newTheme = 'system';
-                        break;
-                    default:
-                        newTheme = 'system';
-                }
-
-                localStorage.setItem('theme', newTheme);
-
-                // 设置实际主题
-                if (newTheme === 'system') {
-                    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    html.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-                } else {
-                    html.setAttribute('data-theme', newTheme);
-                }
-
-                updateThemeIcon(newTheme);
-            }
-
-            function updateThemeIcon(theme) {
-                const iconPath = themeToggleBtn.querySelector('path');
-                switch (theme) {
-                    case 'system':
-                        // 显示系统图标（电脑显示器）
-                        iconPath.setAttribute('d', 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z');
-                        break;
-                    case 'dark':
-                        // 显示月亮图标
-                        iconPath.setAttribute('d', 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z');
-                        break;
-                    case 'light':
-                        // 显示太阳图标
-                        iconPath.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
-                        break;
-                }
-            }
-
-            // 添加系统主题变化监听
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (localStorage.getItem('theme') === 'system') {
-                    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-                }
+            // 保存更改
+            const updateResponse = await fetch('/api/mapping', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    originalPath: rowOriginalData.path,
+                    storeName: newStoreName,
+                    nailName: newNailName,
+                    storeAddress: newStoreAddress,
+                    path: newPath,
+                    target: newTarget,
+                    expiry: newExpiry || null,
+                    enabled: newEnabled,
+                    isWechat: newIsWechat,
+                    qrCodeData: serverData.qrCodeData // 使用服务器返回的原始二维码数据
+                })
             });
 
-            // 初始化主题图标
-            updateThemeIcon(localStorage.getItem('theme') || 'system');
-
-            let allMappings = [];
-            let currentPage = 1;
-            let pageSize = 10;
-
-            // 添加分页和每页显示数量的事件监听器
-            document.getElementById('nextPage').addEventListener('click', async () => {
-                const expiringBtn = document.getElementById('showExpiringBtn');
-                const expiredBtn = document.getElementById('showExpiredBtn');
-                
-                currentPage++;
-                
-                if (expiringBtn.classList.contains('btn-warning')) {
-                    await loadExpiringMappings('expiring');
-                } else if (expiredBtn.classList.contains('btn-error')) {
-                    await loadExpiringMappings('expired');
-                } else {
-                    await loadMappings();
-                }
-            });
-
-            document.getElementById('prevPage').addEventListener('click', async () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    const expiringBtn = document.getElementById('showExpiringBtn');
-                    const expiredBtn = document.getElementById('showExpiredBtn');
-                    
-                    if (expiringBtn.classList.contains('btn-warning')) {
-                        await loadExpiringMappings('expiring');
-                    } else if (expiredBtn.classList.contains('btn-error')) {
-                        await loadExpiringMappings('expired');
-                    } else {
-                        await loadMappings();
-                    }
-                }
-            });
-
-            document.getElementById('pageSize').addEventListener('change', async (e) => {
-                pageSize = parseInt(e.target.value);
-                currentPage = 1;
-                
-                // 根据当前视图状态重新加载数据
-                const expiringBtn = document.getElementById('showExpiringBtn');
-                const expiredBtn = document.getElementById('showExpiredBtn');
-                
-                if (expiringBtn.classList.contains('btn-warning')) {
-                    await loadExpiringMappings('expiring');
-                } else if (expiredBtn.classList.contains('btn-error')) {
-                    await loadExpiringMappings('expired');
-                } else {
-                    await loadMappings();
-                }
-            });
-
-            async function logout() {
-                try {
-                    const response = await fetch('/api/logout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    if (!response.ok) {
-                        showAlert('登出失败，请重试');
-                        return;
-                    }
-
-                    window.location.href = '/login';
-                } catch (error) {
-                    console.error('登出失败:', error);
-                    showAlert('登出失败，请检查网络连接后重试');
-                }
+            if (!updateResponse.ok) {
+                const data = await updateResponse.json();
+                showAlert(data.message || data.error || '更新失败，请重试');
+                return;
             }
 
-            // 添加加载即将过期映射的函数
-            async function loadExpiringMappings(type) {
-                const tableBody = document.getElementById('mappingsTableBody');
-                const skeleton = document.getElementById('skeleton');
+            showAlert('更新成功', 'success');
+            
+            // 不再刷新整个页面，而是重新加载表格数据
+            await loadMappings();
+            
+            // 如果当前在过期或即将过期的视图中，重新加载相应的数据
+            const expiringBtn = document.getElementById('showExpiringBtn');
+            const expiredBtn = document.getElementById('showExpiredBtn');
+            
+            if (expiringBtn.classList.contains('btn-warning')) {
+                await loadExpiringMappings('expiring');
+            } else if (expiredBtn.classList.contains('btn-error')) {
+                await loadExpiringMappings('expired');
+            }
+        } catch (error) {
+            console.error('更新失败:', error);
+            showAlert('更新失败，请检查网络连接后重试');
+        }
+    }
 
-                // 显示骨架屏，隐藏表格内容
-                tableBody.style.display = 'none';
-                skeleton.classList.remove('hidden');
+    function restoreRow(row) {
+        const cells = row.cells;
+        const originalData = JSON.parse(row.dataset.originalData);
 
-                try {
-                    const response = await fetch(`/api/expiring-mappings?page=${currentPage}&pageSize=${pageSize}`);
+        // 恢复各个单元格的内容
+        cells[0].textContent = originalData.storeName || '-';
+        cells[1].textContent = originalData.nailName || '-';
+        cells[2].textContent = originalData.storeAddress || '-';
+        cells[3].textContent = originalData.path;
+        cells[4].textContent = originalData.target;
+        cells[5].textContent = originalData.expiry || '永久有效';
 
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return;
-                    }
+        // 恢复状态列
+        cells[6].innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="badge ${originalData.enabled ? 'badge-success' : 'badge-error'}">
+                    ${originalData.enabled ? '启用' : '禁用'}
+                </span>
+                ${originalData.isWechat ? '<span class="badge badge-info">微信</span>' : ''}
+            </div>
+        `;
 
-                    const data = await response.json();
-                    
-                    // 获取今天的日期（去除时间部分）
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    // 根据类型和过期时间筛选数据
-                    const mappingsArray = data[type];
-                    
-                    // 确保日期比较的准确性
-                    mappingsArray.forEach(mapping => {
-                        const expiryDate = new Date(mapping.expiry);
-                        expiryDate.setHours(0, 0, 0, 0); // 只比较日期部分
-                        mapping.isExpired = expiryDate < today;
-                    });
-                    
-                    // 根据类型过滤数据
-                    const filteredMappings = type === 'expired' 
-                        ? mappingsArray.filter(m => m.isExpired)
-                        : mappingsArray.filter(m => !m.isExpired);
-                        
-                    const total = filteredMappings.length;
-                    
-                    // 计算当前页的数据
-                    const start = (currentPage - 1) * pageSize;
-                    const end = Math.min(start + pageSize, total);
-                    const currentPageData = filteredMappings.slice(start, end);
-                    
-                    // 清空表格
-                    tableBody.innerHTML = '';
-                    
-                    // 渲染当前页数据
-                    currentPageData.forEach(mapping => {
-                        const row = createMappingRow(mapping.path, {
-                            name: mapping.name,
-                            target: mapping.target,
-                            expiry: mapping.expiry,
-                            enabled: mapping.enabled,
-                            isWechat: mapping.isWechat,
-                            qrCodeData: mapping.qrCodeData
-                        });
-                        tableBody.appendChild(row);
-                    });
+        // 恢复按钮组
+        const actionsCell = cells[7];
+        actionsCell.innerHTML = `
+            <div class="join">
+                <button class="join-item btn btn-warning btn-sm">编辑</button>
+                <button class="join-item btn btn-error btn-sm">删除</button>
+                <button class="join-item btn btn-info btn-sm">二维码</button>
+            </div>
+        `;
 
-                    // 更新分页信息
-                    const totalPages = Math.ceil(total / pageSize);
-                    document.getElementById('currentPage').textContent = currentPage;
-                    document.getElementById('prevPage').disabled = currentPage <= 1;
-                    document.getElementById('nextPage').disabled = currentPage >= totalPages || total === 0;
+        // 重新绑定事件监听器
+        const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
+        editBtn.onclick = () => toggleEditMode(row);
+        deleteBtn.onclick = () => deleteMapping(originalData.path);
+        qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path);
 
-                } catch (error) {
-                    console.error('加载数据失败:', error);
-                    showAlert('加载数据失败，请刷新页面重试');
-                } finally {
-                    skeleton.classList.add('hidden');
-                    tableBody.style.display = '';
-                }
+        row.classList.remove('editing');
+    }
+
+    async function updateMapping(mapping) {
+        try {
+            const response = await fetch('/api/mapping', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mapping)
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
             }
 
-            // 在页面加载时初始化二维码设置
-            document.addEventListener('DOMContentLoaded', function() {
-                // 初始化二维码设置
-                const savedShowLogo = localStorage.getItem('qr-show-logo');
-                const savedDotsStyle = localStorage.getItem('qr-dots-style');
+            if (!response.ok) {
+                const data = await response.json();
+                showAlert(data.message || data.error || '更新失败，请重试');
+                return;
+            }
+
+            showAlert('更新成功', 'success');
+            location.reload();
+        } catch (error) {
+            console.error('更新短链二维码失败:', error);
+            showAlert('更新失败，请检查网络连接后重试');
+        }
+    }
+
+    // 修改 toggleTheme 函数
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 'system';
+        let newTheme;
+
+        // 循环切换：system -> light -> dark -> system
+        switch (currentTheme) {
+            case 'system':
+                newTheme = 'light';
+                break;
+            case 'light':
+                newTheme = 'dark';
+                break;
+            case 'dark':
+                newTheme = 'system';
+                break;
+            default:
+                newTheme = 'system';
+        }
+
+        localStorage.setItem('theme', newTheme);
+
+        // 设置实际主题
+        if (newTheme === 'system') {
+            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+        } else {
+            html.setAttribute('data-theme', newTheme);
+        }
+
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const iconPath = themeToggleBtn.querySelector('path');
+        switch (theme) {
+            case 'system':
+                // 显示系统图标（电脑显示器）
+                iconPath.setAttribute('d', 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z');
+                break;
+            case 'dark':
+                // 显示月亮图标
+                iconPath.setAttribute('d', 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z');
+                break;
+            case 'light':
+                // 显示太阳图标
+                iconPath.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
+                break;
+        }
+    }
+
+    // 添加系统主题变化监听
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (localStorage.getItem('theme') === 'system') {
+            document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+    });
+
+    // 初始化主题图标
+    updateThemeIcon(localStorage.getItem('theme') || 'system');
+
+    let allMappings = [];
+    let currentPage = 1;
+    let pageSize = 10;
+
+    // 添加分页和每页显示数量的事件监听器
+    document.getElementById('nextPage').addEventListener('click', async () => {
+        const expiringBtn = document.getElementById('showExpiringBtn');
+        const expiredBtn = document.getElementById('showExpiredBtn');
+        
+        currentPage++;
+        
+        if (expiringBtn.classList.contains('btn-warning')) {
+            await loadExpiringMappings('expiring');
+        } else if (expiredBtn.classList.contains('btn-error')) {
+            await loadExpiringMappings('expired');
+        } else {
+            await loadMappings();
+        }
+    });
+
+    document.getElementById('prevPage').addEventListener('click', async () => {
+        if (currentPage > 1) {
+            currentPage--;
+            const expiringBtn = document.getElementById('showExpiringBtn');
+            const expiredBtn = document.getElementById('showExpiredBtn');
+            
+            if (expiringBtn.classList.contains('btn-warning')) {
+                await loadExpiringMappings('expiring');
+            } else if (expiredBtn.classList.contains('btn-error')) {
+                await loadExpiringMappings('expired');
+            } else {
+                await loadMappings();
+            }
+        }
+    });
+
+    document.getElementById('pageSize').addEventListener('change', async (e) => {
+        pageSize = parseInt(e.target.value);
+        currentPage = 1;
+        
+        // 根据当前视图状态重新加载数据
+        const expiringBtn = document.getElementById('showExpiringBtn');
+        const expiredBtn = document.getElementById('showExpiredBtn');
+        
+        if (expiringBtn.classList.contains('btn-warning')) {
+            await loadExpiringMappings('expiring');
+        } else if (expiredBtn.classList.contains('btn-error')) {
+            await loadExpiringMappings('expired');
+        } else {
+            await loadMappings();
+        }
+    });
+
+    async function logout() {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                showAlert('登出失败，请重试');
+                return;
+            }
+
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('登出失败:', error);
+            showAlert('登出失败，请检查网络连接后重试');
+        }
+    }
+
+    // 添加加载即将过期映射的函数
+    async function loadExpiringMappings(type) {
+        const tableBody = document.getElementById('mappingsTableBody');
+        const skeleton = document.getElementById('skeleton');
+
+        // 显示骨架屏，隐藏表格内容
+        tableBody.style.display = 'none';
+        skeleton.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/expiring-mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const data = await response.json();
+            
+            // 获取今天的日期（去除时间部分）
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // 根据类型和过期时间筛选数据
+            const mappingsArray = data[type];
+            
+            // 确保日期比较的准确性
+            mappingsArray.forEach(mapping => {
+                const expiryDate = new Date(mapping.expiry);
+                expiryDate.setHours(0, 0, 0, 0); // 只比较日期部分
+                mapping.isExpired = expiryDate < today;
+            });
+            
+            // 根据类型过滤数据
+            const filteredMappings = type === 'expired' 
+                ? mappingsArray.filter(m => m.isExpired)
+                : mappingsArray.filter(m => !m.isExpired);
                 
-                // 设置显示logo复选框
-                if (savedShowLogo !== null) {
-                    document.getElementById('qr-show-logo').checked = savedShowLogo === 'true';
-                }
-                
-                // 设置点样式下拉框
-                if (savedDotsStyle) {
-                    document.getElementById('qr-dots-style').value = savedDotsStyle;
-                }
-                
-                // 添加设置变更监听器
-                document.getElementById('qr-show-logo').addEventListener('change', function(e) {
-                    localStorage.setItem('qr-show-logo', e.target.checked);
-                    // 如果二维码已经显示，则更新二维码
-                    if (qrCode) {
-                        updateQRCode();
-                    }
+            const total = filteredMappings.length;
+            
+            // 计算当前页的数据
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, total);
+            const currentPageData = filteredMappings.slice(start, end);
+            
+            // 清空表格
+            tableBody.innerHTML = '';
+            
+            // 渲染当前页数据
+            currentPageData.forEach(mapping => {
+                const row = createMappingRow(mapping.path, {
+                    storeName: mapping.storeName,
+                    nailName: mapping.nailName,
+                    storeAddress: mapping.storeAddress,
+                    target: mapping.target,
+                    expiry: mapping.expiry,
+                    enabled: mapping.enabled,
+                    isWechat: mapping.isWechat,
+                    qrCodeData: mapping.qrCodeData
                 });
-                
-                document.getElementById('qr-dots-style').addEventListener('change', function(e) {
-                    localStorage.setItem('qr-dots-style', e.target.value);
-                    // 如果二维码已经显示，则更新二维码
-                    if (qrCode) {
-                        updateQRCode();
-                    }
-                });
+                tableBody.appendChild(row);
             });
 
-            // 更新生成二维码的函数，使用保存的设置
-            function updateQRCode() {
-                const url = document.getElementById('qr-url').value;
-                const showLogo = document.getElementById('qr-show-logo').checked;
-                const dotsStyle = document.getElementById('qr-dots-style').value;
-                
-                const options = {
-                    width: 240,
-                    height: 240,
-                    data: url,
-                    margin: 10,
-                    qrOptions: {
-                        typeNumber: 0,
-                        mode: 'Byte',
-                        errorCorrectionLevel: 'H'
-                    },
-                    imageOptions: {
-                        hideBackgroundDots: true,
-                        imageSize: 0.4,
-                        margin: 4
-                    },
-                    dotsOptions: {
-                        type: dotsStyle,
-                        color: '#000000'
-                    },
-                    backgroundOptions: {
-                        color: '#ffffff'
-                    }
-                };
-
-                if (showLogo) {
-                    options.image = '/wechat.svg';
-                }
-
-                // 如果已经存在二维码实例，先移除旧的
-                if (qrCode) {
-                    const container = document.getElementById('qr-container');
-                    container.classList.add('switching');
-                    
-                    setTimeout(() => {
-                        qrCode.update(options);
-                        container.classList.remove('switching');
-                    }, 200);
-                } else {
-                    qrCode = new QRCodeStyling(options);
-                    qrCode.append(document.getElementById('qr-container'));
-                }
-            }
-
-        });
-    </script>
-</body>
-
-</html>
+            // 更新分页信息
+            const totalPages = Math.ceil(total / pageSize);
+            document.getElementById('currentPage').textContent = currentPage;
+            document
