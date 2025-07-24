@@ -295,11 +295,37 @@
             </form>
             <h3 class="font-bold text-lg mb-4">二维码</h3>
             <div id="qr-container" class="flex justify-center mb-4"></div>
-            <div class="mb-4">
-                <label class="floating-label">
-                    <span class="label-text text-primary">链接地址</span>
-                </label>
-                <input type="text" id="qr-url" class="input input-ghost w-full" readonly>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-sm">
+                <div>
+                    <label class="floating-label">
+                        <span class="label-text text-primary">门店名称</span>
+                    </label>
+                    <div id="qr-shop-name" class="input input-ghost w-full pl-0 pt-0 pb-0 border-0 min-h-0 h-auto"></div>
+                </div>
+                <div>
+                    <label class="floating-label">
+                        <span class="label-text text-primary">美甲名称</span>
+                    </label>
+                    <div id="qr-manicure-name" class="input input-ghost w-full pl-0 pt-0 pb-0 border-0 min-h-0 h-auto"></div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="floating-label">
+                        <span class="label-text text-primary">详细地址</span>
+                    </label>
+                    <div id="qr-address" class="input input-ghost w-full pl-0 pt-0 pb-0 border-0 min-h-0 h-auto"></div>
+                </div>
+                <div>
+                    <label class="floating-label">
+                        <span class="label-text text-primary">生成时间</span>
+                    </label>
+                    <div id="qr-generated-time" class="input input-ghost w-full pl-0 pt-0 pb-0 border-0 min-h-0 h-auto"></div>
+                </div>
+                <div>
+                    <label class="floating-label">
+                        <span class="label-text text-primary">链接地址</span>
+                    </label>
+                    <input type="text" id="qr-url" class="input input-ghost w-full" readonly>
+                </div>
             </div>
             <div class="modal-action gap-4">
                 <label class="label cursor-pointer gap-2">
@@ -1275,19 +1301,23 @@
             }
 
             // 修改生成二维码的函数
-            function generateQRForMapping(url, newPath) {
+            function generateQRForMapping(url, newPath, mappingData) {
                 const modal = document.getElementById('qr-modal');
                 const container = document.getElementById('qr-container');
                 const downloadBtn = document.getElementById('qr-download');
                 const urlInput = document.getElementById('qr-url');
                 const showLogoCheckbox = document.getElementById('qr-show-logo');
                 const dotsStyleSelect = document.getElementById('qr-dots-style');
+                
+                // 设置门店信息
+                document.getElementById('qr-shop-name').textContent = mappingData.name || '-';
+                document.getElementById('qr-manicure-name').textContent = mappingData.manicureName || '-';
+                document.getElementById('qr-address').textContent = mappingData.address || '-';
+                document.getElementById('qr-generated-time').textContent = new Date().toLocaleString('zh-CN');
+                urlInput.value = url;
 
                 // 清空之前的内容
                 container.innerHTML = '';
-
-                // 设置 URL 文本
-                urlInput.value = url;
 
                 // 从 localStorage 获取保存的设置
                 const savedShowLogo = localStorage.getItem('qr-show-logo');
@@ -1436,14 +1466,22 @@
                     </div>
                 `;
 
-                // 添加事件监听器
+                // 重新绑定事件监听器
                 const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
                 editBtn.onclick = () => toggleEditMode(row);
-                deleteBtn.onclick = (e) => {
-                    e.preventDefault();
-                    deleteMapping(path);
+                deleteBtn.onclick = () => deleteMapping(originalData.path);
+                qrBtn.onclick = () => {
+                    // 获取当前行的完整数据
+                    fetch(`/api/mapping?path=${originalData.path}`)
+                        .then(response => response.json())
+                        .then(mappingData => {
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, mappingData);
+                        })
+                        .catch(error => {
+                            console.error('获取数据失败:', error);
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, {});
+                        });
                 };
-                qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + path, path);
 
                 row.appendChild(actionsCell);
                 return row;
@@ -1500,7 +1538,19 @@
                         const [saveBtn, cancelBtn, qrBtn] = actionsCell.querySelectorAll('button');
                         saveBtn.onclick = () => saveEdit(row);
                         cancelBtn.onclick = () => restoreRow(row);
-                        qrBtn.onclick = () => generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path);
+                        qrBtn.onclick = () => {
+                            // 获取当前行的完整数据
+                            fetch(`/api/mapping?path=${originalData.path}`)
+                                .then(response => response.json())
+                                .then(mappingData => {
+                                    generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, mappingData);
+                                })
+                                .catch(error => {
+                                    console.error('获取数据失败:', error);
+                                    generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, {});
+                                });
+                        };
+
                     } catch (error) {
                         console.error('获取数据失败:', error);
                         showAlert('获取数据失败，请重试');
