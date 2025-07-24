@@ -61,36 +61,46 @@
         }
 
         /* 调整各列宽度 */
-        .table-responsive th:nth-child(1), /* 条目名称 */
+        .table-responsive th:nth-child(1), /* 门店名称 */
         .table-responsive td:nth-child(1) {
-            width: 15%;
+            width: 12%;
         }
 
-        .table-responsive th:nth-child(2), /* 短链名 */
+        .table-responsive th:nth-child(2), /* 美甲名称 */
         .table-responsive td:nth-child(2) {
             width: 12%;
         }
 
-        .table-responsive th:nth-child(3), /* 目标URL */
+        .table-responsive th:nth-child(3), /* 短链名 */
         .table-responsive td:nth-child(3) {
-            width: 28%;
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(4), /* 目标URL */
+        .table-responsive td:nth-child(4) {
+            width: 20%;
             white-space: normal;
             overflow-wrap: break-word;
         }
 
-        .table-responsive th:nth-child(4), /* 有效日期 */
-        .table-responsive td:nth-child(4) {
-            width: 12%;
-        }
-
-        .table-responsive th:nth-child(5), /* 状态 */
+        .table-responsive th:nth-child(5), /* 详细地址 */
         .table-responsive td:nth-child(5) {
-            width: 13%;
+            width: 15%;
         }
 
-        .table-responsive th:nth-child(6), /* 操作 */
+        .table-responsive th:nth-child(6), /* 有效日期 */
         .table-responsive td:nth-child(6) {
-            width: 20%;
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(7), /* 状态 */
+        .table-responsive td:nth-child(7) {
+            width: 10%;
+        }
+
+        .table-responsive th:nth-child(8), /* 操作 */
+        .table-responsive td:nth-child(8) {
+            width: 11%;
         }
 
         /* 编辑模式下的行样式 */
@@ -126,7 +136,7 @@
 
             /* 表格基础样式调整 */
             .table-responsive table {
-                min-width: 800px; /* 确保在小屏幕上可以横向滚动 */
+                min-width: 1000px; /* 确保在小屏幕上可以横向滚动 */
                 font-size: 0.875rem; /* 稍微减小字体大小 */
             }
 
@@ -139,39 +149,51 @@
             }
 
             /* 优化各列宽度 */
-            .table-responsive th:nth-child(1), /* 条目名称 */
+            .table-responsive th:nth-child(1), /* 门店名称 */
             .table-responsive td:nth-child(1) {
-                min-width: 120px;
-                max-width: 150px;
+                min-width: 100px;
+                max-width: 120px;
             }
 
-            .table-responsive th:nth-child(2), /* 短链名 */
+            .table-responsive th:nth-child(2), /* 美甲名称 */
             .table-responsive td:nth-child(2) {
                 min-width: 100px;
                 max-width: 120px;
             }
 
-            .table-responsive th:nth-child(3), /* 目标URL */
+            .table-responsive th:nth-child(3), /* 短链名 */
             .table-responsive td:nth-child(3) {
-                min-width: 200px;
-                max-width: 300px;
+                min-width: 90px;
+                max-width: 100px;
             }
 
-            .table-responsive th:nth-child(4), /* 有效日期 */
+            .table-responsive th:nth-child(4), /* 目标URL */
             .table-responsive td:nth-child(4) {
-                min-width: 100px;
-                max-width: 120px;
+                min-width: 180px;
+                max-width: 250px;
             }
 
-            .table-responsive th:nth-child(5), /* 状态 */
+            .table-responsive th:nth-child(5), /* 详细地址 */
             .table-responsive td:nth-child(5) {
-                min-width: 100px;
-                max-width: 120px;
+                min-width: 120px;
+                max-width: 150px;
             }
 
-            .table-responsive th:nth-child(6), /* 操作 */
+            .table-responsive th:nth-child(6), /* 有效日期 */
             .table-responsive td:nth-child(6) {
-                min-width: 150px;
+                min-width: 90px;
+                max-width: 100px;
+            }
+
+            .table-responsive th:nth-child(7), /* 状态 */
+            .table-responsive td:nth-child(7) {
+                min-width: 90px;
+                max-width: 100px;
+            }
+
+            .table-responsive th:nth-child(8), /* 操作 */
+            .table-responsive td:nth-child(8) {
+                min-width: 130px;
                 position: sticky;
                 right: 0;
                 background: var(--b1);
@@ -398,9 +420,16 @@
                     <div class="space-y-4">
                         <div>
                             <label for="newName" class="label">
-                                <span class="label-text">条目名称</span>
+                                <span class="label-text">门店名称</span>
                             </label>
-                            <input type="text" id="newName" placeholder="条目名称，例:音乐群1"
+                            <input type="text" id="newName" placeholder="门店名称，例:XX美甲店"
+                                class="input input-bordered w-full">
+                        </div>
+                        <div>
+                            <label for="newManicureName" class="label">
+                                <span class="label-text">美甲名称</span>
+                            </label>
+                            <input type="text" id="newManicureName" placeholder="美甲名称，例:梦幻星空甲"
                                 class="input input-bordered w-full">
                         </div>
                         <div>
@@ -416,6 +445,13 @@
                             </label>
                             <input type="text" id="newTarget" placeholder="目标URL，例:https://x.com/xxx"
                                 class="input input-bordered w-full">
+                        </div>
+                        <div>
+                            <label for="newAddress" class="label">
+                                <span class="label-text">详细地址</span>
+                            </label>
+                            <textarea id="newAddress" placeholder="详细地址，例:北京市朝阳区xxx街道xxx号"
+                                class="textarea textarea-bordered w-full"></textarea>
                         </div>
                         <div>
                             <label for="newExpiry" class="label">
@@ -458,31 +494,43 @@
         <div class="card-body">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <h2 class="card-title text-xl">短链二维码管理</h2>
-                <div class="join shadow-lg">
-                    <button id="showAllBtn" class="join-item btn btn-sm btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        全部
-                    </button>
-                    <button id="showExpiringBtn" class="join-item btn btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        即将过期
-                    </button>
-                    <button id="showExpiredBtn" class="join-item btn btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        已过期
-                    </button>
+                <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                    <div class="join shadow-lg">
+                        <button id="showAllBtn" class="join-item btn btn-sm btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            全部
+                        </button>
+                        <button id="showExpiringBtn" class="join-item btn btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            即将过期
+                        </button>
+                        <button id="showExpiredBtn" class="join-item btn btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            已过期
+                        </button>
+                    </div>
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input id="searchInput" type="text" placeholder="搜索门店名称或地址..." class="input input-bordered input-sm w-full">
+                            <button id="searchBtn" class="btn btn-square btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -522,11 +570,14 @@
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr>
-                            <th class="w-[15%]">条目名称</th>
-                            <th class="w-[12%]">短链名</th>
-                            <th class="w-[28%]">目标 URL</th>
-                            <th class="w-[15%]">有效日期</th>
-                            <th class="w-[30%]">状态</th>
+                            <th class="w-[12%]">门店名称</th>
+                            <th class="w-[12%]">美甲名称</th>
+                            <th class="w-[10%]">短链名</th>
+                            <th class="w-[20%]">目标 URL</th>
+                            <th class="w-[15%]">详细地址</th>
+                            <th class="w-[10%]">有效日期</th>
+                            <th class="w-[10%]">状态</th>
+                            <th class="w-[11%]">操作</th>
                         </tr>
                     </thead>
                     <tbody id="mappingsTableBody">
@@ -695,6 +746,90 @@
                 
                 // 初始禁用微信二维码开关
                 document.getElementById('newIsWechat').disabled = true;
+                
+                // 添加搜索功能
+                document.getElementById('searchBtn').addEventListener('click', searchMappings);
+                document.getElementById('searchInput').addEventListener('keyup', function(event) {
+                    if (event.key === 'Enter') {
+                        searchMappings();
+                    }
+                });
+            }
+
+            // 添加搜索功能
+            async function searchMappings() {
+                const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+                if (!searchTerm) {
+                    // 如果搜索词为空，显示所有数据
+                    await loadMappings();
+                    return;
+                }
+
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 过滤数据
+                    const filteredMappings = allMappings.filter(([path, mapping]) => {
+                        return (
+                            (mapping.name && mapping.name.toLowerCase().includes(searchTerm)) ||
+                            (mapping.manicureName && mapping.manicureName.toLowerCase().includes(searchTerm)) ||
+                            (mapping.address && mapping.address.toLowerCase().includes(searchTerm))
+                        );
+                    });
+                    
+                    // 更新表格内容
+                    renderSearchResults(filteredMappings);
+
+                    // 更新分页信息
+                    currentPage = 1;
+                    const totalPages = Math.ceil(filteredMappings.length / pageSize);
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    showAlert('搜索失败，请重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderSearchResults(filteredMappings) {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 渲染过滤后的结果
+                for (const [path, mapping] of filteredMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
             }
 
             // 添加全局错误处理
@@ -941,7 +1076,7 @@
 
                 setTimeout(() => {
                     alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 300);
+                    setTimeout(() => alert.remove(), 3000);
                 }, 3000);
             }
 
@@ -1012,8 +1147,10 @@
 
             async function addMapping() {
                 const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
                 const path = document.getElementById('newPath').value.trim();
                 const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
                 const expiry = document.getElementById('newExpiry').value;
                 const enabled = document.getElementById('newEnabled').checked;
                 const isWechat = document.getElementById('newIsWechat').checked;
@@ -1021,7 +1158,7 @@
 
                 // 输入验证
                 if (!name) {
-                    showAlert('请输入条目名称');
+                    showAlert('请输入门店名称');
                     return;
                 }
                 if (!path) {
@@ -1047,8 +1184,10 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             name, 
+                            manicureName,
                             path, 
                             target, 
+                            address,
                             expiry,
                             enabled,
                             isWechat,
@@ -1244,8 +1383,10 @@
                 // 保存完整的原始数据到 row 的 dataset
                 row.dataset.originalData = JSON.stringify({
                     name: mapping.name || '',
+                    manicureName: mapping.manicureName || '',
                     path: path,
                     target: mapping.target,
+                    address: mapping.address || '',
                     expiry: mapping.expiry || '',
                     enabled: mapping.enabled,
                     isWechat: mapping.isWechat,
@@ -1255,14 +1396,16 @@
                 // 使用数组和 map 来优化单元格创建
                 const cellsData = [
                     { text: mapping.name || '-', data: mapping.name || '-' },
+                    { text: mapping.manicureName || '-', data: mapping.manicureName || '-' },
                     { text: path, data: path },
                     { text: mapping.target, data: mapping.target },
+                    { text: mapping.address || '-', data: mapping.address || '-' },
                     { text: mapping.expiry || '永久有效', data: mapping.expiry || '' }
                 ];
 
                 cellsData.forEach(({ text, data }, index) => {
                     const cell = document.createElement('td');
-                    if (index === 2) { // 目标URL单元格
+                    if (index === 3) { // 目标URL单元格
                         cell.classList.add('whitespace-normal', 'break-words', 'max-w-xs');
                         cell.style.wordBreak = 'break-all';
                         cell.style.minWidth = '200px';
@@ -1323,12 +1466,14 @@
 
                         // 切换到编辑模式
                         cells[0].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.name || ''}">`;
-                        cells[1].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.path}">`;
-                        cells[2].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full h-24" style="resize:none; word-break:break-all;">${mappingData.target}</textarea>`;
-                        cells[3].innerHTML = `<input type="date" class="input input-bordered input-sm w-full" value="${mappingData.expiry || ''}">`;
+                        cells[1].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.manicureName || ''}">`;
+                        cells[2].innerHTML = `<input type="text" class="input input-bordered input-sm w-full" value="${mappingData.path}">`;
+                        cells[3].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full h-24" style="resize:none; word-break:break-all;">${mappingData.target}</textarea>`;
+                        cells[4].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full" style="resize:none;">${mappingData.address || ''}</textarea>`;
+                        cells[5].innerHTML = `<input type="date" class="input input-bordered input-sm w-full" value="${mappingData.expiry || ''}">`;
                         
                         // 状态切换
-                        cells[4].innerHTML = `
+                        cells[6].innerHTML = `
                             <div class="flex flex-col gap-2">
                                 <label class="cursor-pointer label justify-start gap-2">
                                     <input type="checkbox" class="toggle toggle-primary toggle-sm" ${mappingData.enabled ? 'checked' : ''}>
@@ -1342,7 +1487,7 @@
                         `;
 
                         // 修改按钮组
-                        const actionsCell = cells[5];
+                        const actionsCell = cells[7];
                         actionsCell.innerHTML = `
                             <div class="join">
                                 <button class="join-item btn btn-success btn-sm">保存</button>
@@ -1369,19 +1514,23 @@
                 const rowOriginalData = JSON.parse(row.dataset.originalData);
 
                 const newName = cells[0].querySelector('input').value;
-                const newPath = cells[1].querySelector('input').value;
-                const newTarget = cells[2].querySelector('textarea').value;
-                const newExpiry = cells[3].querySelector('input').value;
-                const enabledToggle = cells[4].querySelector('input[type="checkbox"]');
-                const isWechatToggle = cells[4].querySelectorAll('input[type="checkbox"]')[1];
+                const newManicureName = cells[1].querySelector('input').value;
+                const newPath = cells[2].querySelector('input').value;
+                const newTarget = cells[3].querySelector('textarea').value;
+                const newAddress = cells[4].querySelector('textarea').value;
+                const newExpiry = cells[5].querySelector('input').value;
+                const enabledToggle = cells[6].querySelector('input[type="checkbox"]');
+                const isWechatToggle = cells[6].querySelectorAll('input[type="checkbox"]')[1];
                 const newEnabled = enabledToggle.checked;
                 const newIsWechat = isWechatToggle ? isWechatToggle.checked : false;
 
                 // 检查是否有任何修改
                 const hasChanges =
                     newName !== rowOriginalData.name ||
+                    newManicureName !== rowOriginalData.manicureName ||
                     newPath !== rowOriginalData.path ||
                     newTarget !== rowOriginalData.target ||
+                    newAddress !== rowOriginalData.address ||
                     newExpiry !== rowOriginalData.expiry ||
                     newEnabled !== rowOriginalData.enabled ||
                     (isWechatToggle && newIsWechat !== rowOriginalData.isWechat);
@@ -1408,6 +1557,8 @@
                             path: newPath,
                             target: newTarget,
                             name: newName,
+                            manicureName: newManicureName,
+                            address: newAddress,
                             expiry: newExpiry || null,
                             enabled: newEnabled,
                             isWechat: newIsWechat,
@@ -1447,12 +1598,14 @@
 
                 // 恢复各个单元格的内容
                 cells[0].textContent = originalData.name || '-';
-                cells[1].textContent = originalData.path;
-                cells[2].textContent = originalData.target;
-                cells[3].textContent = originalData.expiry || '永久有效';
+                cells[1].textContent = originalData.manicureName || '-';
+                cells[2].textContent = originalData.path;
+                cells[3].textContent = originalData.target;
+                cells[4].textContent = originalData.address || '-';
+                cells[5].textContent = originalData.expiry || '永久有效';
 
                 // 恢复状态列
-                cells[4].innerHTML = `
+                cells[6].innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="badge ${originalData.enabled ? 'badge-success' : 'badge-error'}">
                             ${originalData.enabled ? '启用' : '禁用'}
@@ -1462,7 +1615,7 @@
                 `;
 
                 // 恢复按钮组
-                const actionsCell = cells[5];
+                const actionsCell = cells[7];
                 actionsCell.innerHTML = `
                     <div class="join">
                         <button class="join-item btn btn-warning btn-sm">编辑</button>
@@ -1693,7 +1846,9 @@
                     currentPageData.forEach(mapping => {
                         const row = createMappingRow(mapping.path, {
                             name: mapping.name,
+                            manicureName: mapping.manicureName,
                             target: mapping.target,
+                            address: mapping.address,
                             expiry: mapping.expiry,
                             enabled: mapping.enabled,
                             isWechat: mapping.isWechat,
