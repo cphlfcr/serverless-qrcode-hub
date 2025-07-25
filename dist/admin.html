@@ -780,82 +780,69 @@
                         searchMappings();
                     }
                 });
-            }
-
-            // 添加搜索功能
-            async function searchMappings() {
-                const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-                if (!searchTerm) {
-                    // 如果搜索词为空，显示所有数据
-                    await loadMappings();
-                    return;
-                }
-
-                const tableBody = document.getElementById('mappingsTableBody');
-                const skeleton = document.getElementById('skeleton');
-
-                // 显示骨架屏，隐藏表格内容
-                tableBody.style.display = 'none';
-                skeleton.classList.remove('hidden');
-
-                try {
-                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
-
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return;
-                    }
-
-                    if (!response.ok) {
-                        throw new Error('加载数据失败');
-                    }
-
-                    const data = await response.json();
-                    allMappings = Object.entries(data.mappings);
+                
+                // 添加分页和每页显示数量的事件监听器
+                document.getElementById('nextPage').addEventListener('click', async () => {
+                    const expiringBtn = document.getElementById('showExpiringBtn');
+                    const expiredBtn = document.getElementById('showExpiredBtn');
                     
-                    // 过滤数据
-                    const filteredMappings = allMappings.filter(([path, mapping]) => {
-                        return (
-                            (mapping.name && mapping.name.toLowerCase().includes(searchTerm)) ||
-                            (mapping.manicureName && mapping.manicureName.toLowerCase().includes(searchTerm)) ||
-                            (mapping.address && mapping.address.toLowerCase().includes(searchTerm))
-                        );
-                    });
+                    currentPage++;
                     
-                    // 更新表格内容
-                    renderSearchResults(filteredMappings);
+                    if (expiringBtn.classList.contains('btn-warning')) {
+                        await loadExpiringMappings('expiring');
+                    } else if (expiredBtn.classList.contains('btn-error')) {
+                        await loadExpiringMappings('expired');
+                    } else {
+                        await loadMappings();
+                    }
+                });
 
-                    // 更新分页信息
+                document.getElementById('prevPage').addEventListener('click', async () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        const expiringBtn = document.getElementById('showExpiringBtn');
+                        const expiredBtn = document.getElementById('showExpiredBtn');
+                        
+                        if (expiringBtn.classList.contains('btn-warning')) {
+                            await loadExpiringMappings('expiring');
+                        } else if (expiredBtn.classList.contains('btn-error')) {
+                            await loadExpiringMappings('expired');
+                        } else {
+                            await loadMappings();
+                        }
+                    }
+                });
+
+                document.getElementById('pageSize').addEventListener('change', async (e) => {
+                    pageSize = parseInt(e.target.value);
                     currentPage = 1;
-                    const totalPages = Math.ceil(filteredMappings.length / pageSize);
-                    document.getElementById('currentPage').textContent = currentPage;
-                    document.getElementById('prevPage').disabled = currentPage <= 1;
-                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
-
-                } catch (error) {
-                    console.error('搜索失败:', error);
-                    showAlert('搜索失败，请重试');
-                } finally {
-                    // 隐藏骨架屏，显示表格内容
-                    skeleton.classList.add('hidden');
-                    tableBody.style.display = '';
+                    
+                    // 根据当前视图状态重新加载数据
+                    const expiringBtn = document.getElementById('showExpiringBtn');
+                    const expiredBtn = document.getElementById('showExpiredBtn');
+                    
+                    if (expiringBtn.classList.contains('btn-warning')) {
+                        await loadExpiringMappings('expiring');
+                    } else if (expiredBtn.classList.contains('btn-error')) {
+                        await loadExpiringMappings('expired');
+                    } else {
+                        await loadMappings();
+                    }
+                });
+                
+                // 初始化二维码设置
+                const savedShowLogo = localStorage.getItem('qr-show-logo');
+                const savedDotsStyle = localStorage.getItem('qr-dots-style');
+                
+                // 设置显示logo复选框
+                if (savedShowLogo !== null) {
+                    document.getElementById('qr-show-logo').checked = savedShowLogo === 'true';
                 }
-            }
-
-            function renderSearchResults(filteredMappings) {
-                const table = document.getElementById('mappingsTableBody');
-                // 清空现有内容
-                table.innerHTML = '';
-
-                const fragment = document.createDocumentFragment();
-
-                // 渲染过滤后的结果
-                for (const [path, mapping] of filteredMappings) {
-                    const row = createMappingRow(path, mapping);
-                    fragment.appendChild(row);
+                
+                // 设置点样式下拉框
+                if (savedDotsStyle) {
+                    document.getElementById('qr-dots-style').value = savedDotsStyle;
                 }
-
-                table.appendChild(fragment);
             }
 
             // 添加全局错误处理
@@ -1129,6 +1116,9 @@
                     const data = await response.json();
                     allMappings = Object.entries(data.mappings);
                     
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
                     // 等待一小段时间再更新DOM
                     await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -1207,6 +1197,2764 @@
                 try {
                     const response = await fetch('/api/mapping', {
                         method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderCurrentPage() {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 直接遍历所有映射
+                for (const [path, mapping] of allMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+
+            async function addMapping() {
+                const name = document.getElementById('newName').value.trim();
+            // 添加搜索功能
+            async function searchMappings() {
+                const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+                if (!searchTerm) {
+                    // 如果搜索词为空，显示所有数据
+                    await loadMappings();
+                    return;
+                }
+
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 过滤数据
+                    const filteredMappings = allMappings.filter(([path, mapping]) => {
+                        return (
+                            (mapping.name && mapping.name.toLowerCase().includes(searchTerm)) ||
+                            (mapping.manicureName && mapping.manicureName.toLowerCase().includes(searchTerm)) ||
+                            (mapping.address && mapping.address.toLowerCase().includes(searchTerm))
+                        );
+                    });
+                    
+                    // 更新表格内容
+                    renderSearchResults(filteredMappings);
+
+                    // 更新分页信息
+                    currentPage = 1;
+                    const totalPages = Math.ceil(filteredMappings.length / pageSize);
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    showAlert('搜索失败，请重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
+
+            function renderSearchResults(filteredMappings) {
+                const table = document.getElementById('mappingsTableBody');
+                // 清空现有内容
+                table.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                // 渲染过滤后的结果
+                for (const [path, mapping] of filteredMappings) {
+                    const row = createMappingRow(path, mapping);
+                    fragment.appendChild(row);
+                }
+
+                table.appendChild(fragment);
+            }
+                const manicureName = document.getElementById('newManicureName').value.trim();
+                const path = document.getElementById('newPath').value.trim();
+                const target = document.getElementById('newTarget').value.trim();
+                const address = document.getElementById('newAddress').value.trim();
+                const expiry = document.getElementById('newExpiry').value;
+                const enabled = document.getElementById('newEnabled').checked;
+                const isWechat = document.getElementById('newIsWechat').checked;
+                const qrCodeData = document.getElementById('qrCodeData').value;
+
+                // 输入验证
+                if (!name) {
+                    showAlert('请输入门店名称');
+                    return;
+                }
+                if (!path) {
+                    showAlert('请输入短链名');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9-_]+$/.test(path)) {
+                    showAlert('短链名只能包含字母、数字、下划线和横线');
+                    return;
+                }
+                if (!target) {
+                    showAlert('请输入目标 URL');
+                    return;
+                }
+                if (isWechat && !qrCodeData) {
+                    showAlert('请先上传微信群二维码');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/mapping', {
+                        method: 'POST',
+```
+
+```
+                        document.getElementById('newTarget').value = text;
+                        // 滚动到添加短链二维码区域
+                        document.getElementById('addNewRow').scrollIntoView({ behavior: 'smooth' });
+                        showAlert('复制成功', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showAlert('复制失败，请手动复制');
+                    });
+            }
+
+            // 修改 showAlert 函数，支持更多类型
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alert = document.createElement('div');
+
+                const alertClass = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+                alert.className = `${alertClass} mb-4 shadow-lg min-w-[300px]`;
+
+                alert.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${type === 'error'
+                        ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+                        : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                alert.style.opacity = '0';
+                alertContainer.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-in-out';
+                    alert.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 3000);
+                }, 3000);
+            }
+
+            async function loadMappings() {
+                const tableBody = document.getElementById('mappingsTableBody');
+                const skeleton = document.getElementById('skeleton');
+
+                // 显示骨架屏，隐藏表格内容
+                tableBody.style.display = 'none';
+                skeleton.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/api/mappings?page=${currentPage}&pageSize=${pageSize}`);
+
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('加载数据失败');
+                    }
+
+                    const data = await response.json();
+                    allMappings = Object.entries(data.mappings);
+                    
+                    // 同步数据到localStorage
+                    updateLocalStorageMappings(data.mappings, 'replace');
+                    
+                    // 等待一小段时间再更新DOM
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    // 更新表格内容
+                    renderCurrentPage();
+
+                    // 更新分页信息
+                    currentPage = data.page;
+                    const totalPages = data.totalPages;
+                    document.getElementById('currentPage').textContent = currentPage;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+                    // 设置页面大小选择器的当前值
+                    document.getElementById('pageSize').value = pageSize;
+
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    showAlert('加载数据失败，请刷新页面重试');
+                } finally {
+                    // 隐藏骨架屏，显示表格内容
+                    skeleton.classList.add('hidden');
+                    tableBody.style.display = '';
+                }
+            }
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             name, 
@@ -1460,14 +4208,169 @@
                 const actionsCell = document.createElement('td');
                 actionsCell.innerHTML = `
                     <div class="join">
-                        <button class="join-item btn btn-warning btn-sm">编辑</button>
-                        <button class="join-item btn btn-error btn-sm">删除</button>
-                        <button class="join-item btn btn-info btn-sm">二维码</button>
+                        <button class="join-item btn btn-warning btn-sm edit-btn">编辑</button>
+                        <button class="join-item btn btn-error btn-sm delete-btn">删除</button>
+                        <button class="join-item btn btn-info btn-sm qr-btn">二维码</button>
                     </div>
                 `;
 
                 // 重新绑定事件监听器
-                const [editBtn, deleteBtn, qrBtn] = actionsCell.querySelectorAll('button');
+                const editBtn = actionsCell.querySelector('.edit-btn');
+                const deleteBtn = actionsCell.querySelector('.delete-btn');
+                const qrBtn = actionsCell.querySelector('.qr-btn');
+                
+                editBtn.onclick = () => toggleEditMode(row);
+                deleteBtn.onclick = () => deleteMapping(originalData.path);
+                qrBtn.onclick = () => {
+                    fetch(`/api/mapping?path=${originalData.path}`)
+                        .then(response => response.json())
+                        .then(mappingData => {
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, mappingData);
+                        })
+                        .catch(error => {
+                            console.error('获取数据失败:', error);
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, {});
+                        });
+                };
+
+                row.classList.remove('editing');
+            }
+
+            async function updateMapping(mapping) {
+                const response = await fetch(`/api/mapping?path=${mapping.path}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mapping)
+                });
+
+                if (!response.ok) {
+                    throw new Error('更新数据失败');
+                }
+
+                return response.json();
+            }
+
+            async function deleteMapping(path) {
+                const response = await fetch(`/api/mapping?path=${path}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('删除数据失败');
+                }
+
+                return response.json();
+            }
+
+            function generateQRForMapping(url, path, mappingData) {
+                const qrCode = new QRCode(document.createElement('div'), {
+                    text: url,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                const qrCodeContainer = document.createElement('div');
+                qrCodeContainer.classList.add('qr-code-container');
+                qrCodeContainer.appendChild(qrCode._el);
+
+                const qrCodeInfo = document.createElement('div');
+                qrCodeInfo.classList.add('qr-code-info');
+
+                const qrCodeInfoName = document.createElement('div');
+                qrCodeInfoName.classList.add('qr-code-info-name');
+                qrCodeInfoName.textContent = mappingData.name || '未命名';
+
+                const qrCodeInfoPath = document.createElement('div');
+                qrCodeInfoPath.classList.add('qr-code-info-path');
+                qrCodeInfoPath.textContent = path;
+
+                qrCodeInfo.appendChild(qrCodeInfoName);
+                qrCodeInfo.appendChild(qrCodeInfoPath);
+
+                const qrCodeModal = document.createElement('div');
+                qrCodeModal.classList.add('modal', 'modal-open');
+
+                const qrCodeModalContent = document.createElement('div');
+                qrCodeModalContent.classList.add('modal-box');
+
+                qrCodeModalContent.appendChild(qrCodeContainer);
+                qrCodeModalContent.appendChild(qrCodeInfo);
+
+                qrCodeModal.appendChild(qrCodeModalContent);
+
+                document.body.appendChild(qrCodeModal);
+
+                qrCodeModal.addEventListener('click', () => {
+                    document.body.removeChild(qrCodeModal);
+                });
+            }
+
+            function createRow(mapping, path) {
+                const row = document.createElement('tr');
+
+                const nameCell = document.createElement('td');
+                nameCell.textContent = mapping.name || '';
+                row.appendChild(nameCell);
+
+                const manicureNameCell = document.createElement('td');
+                manicureNameCell.textContent = mapping.manicureName || '';
+                row.appendChild(manicureNameCell);
+
+                const pathCell = document.createElement('td');
+                pathCell.textContent = path;
+                row.appendChild(pathCell);
+
+                const targetCell = document.createElement('td');
+                targetCell.textContent = mapping.target;
+                row.appendChild(targetCell);
+
+                const addressCell = document.createElement('td');
+                addressCell.textContent = mapping.address || '';
+                row.appendChild(addressCell);
+
+                const expiryCell = document.createElement('td');
+                expiryCell.textContent = mapping.expiry || '';
+                row.appendChild(expiryCell);
+
+                const enabledCell = document.createElement('td');
+                enabledCell.textContent = mapping.enabled ? '启用' : '禁用';
+                row.appendChild(enabledCell);
+
+                const isWechatCell = document.createElement('td');
+                isWechatCell.textContent = mapping.isWechat ? '是' : '否';
+                row.appendChild(isWechatCell);
+
+                const actionsCell = document.createElement('td');
+                actionsCell.innerHTML = `
+                    <div class="join">
+                        <button class="join-item btn btn-warning btn-sm edit-btn">编辑</button>
+                        <button class="join-item btn btn-error btn-sm delete-btn">删除</button>
+                        <button class="join-item btn btn-info btn-sm qr-btn">二维码</button>
+                    </div>
+                `;
+
+                // 重新绑定事件监听器
+                const editBtn = actionsCell.querySelector('.edit-btn');
+                const deleteBtn = actionsCell.querySelector('.delete-btn');
+                const qrBtn = actionsCell.querySelector('.qr-btn');
+                
+                const originalData = {
+                    name: mapping.name || '',
+                    manicureName: mapping.manicureName || '',
+                    path: path,
+                    target: mapping.target,
+                    address: mapping.address || '',
+                    expiry: mapping.expiry || '',
+                    enabled: mapping.enabled,
+                    isWechat: mapping.isWechat,
+                    qrCodeData: mapping.qrCodeData
+                };
+                
                 editBtn.onclick = () => toggleEditMode(row);
                 deleteBtn.onclick = () => deleteMapping(originalData.path);
                 qrBtn.onclick = () => {
@@ -1485,6 +4388,22 @@
 
                 row.appendChild(actionsCell);
                 return row;
+            }
+
+            async function updateMapping(mapping) {
+                const response = await fetch('/api/mapping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mapping)
+                });
+
+                if (!response.ok) {
+                    throw new Error('更新映射失败');
+                }
+
+                return response.json();
             }
 
             // 添加切换编辑模式的函数
@@ -1509,7 +4428,6 @@
                         cells[3].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full h-24" style="resize:none; word-break:break-all;">${mappingData.target}</textarea>`;
                         cells[4].innerHTML = `<textarea class="textarea textarea-bordered textarea-sm w-full" style="resize:none;">${mappingData.address || ''}</textarea>`;
                         cells[5].innerHTML = `<input type="date" class="input input-bordered input-sm w-full" value="${mappingData.expiry || ''}">`;
-                        
                         // 状态切换
                         cells[6].innerHTML = `
                             <div class="flex flex-col gap-2">
@@ -1528,14 +4446,19 @@
                         const actionsCell = cells[7];
                         actionsCell.innerHTML = `
                             <div class="join">
-                                <button class="join-item btn btn-success btn-sm">保存</button>
-                                <button class="join-item btn btn-primary btn-sm">取消</button>
-                                <button class="join-item btn btn-info btn-sm">二维码</button>
+                                <button class="join-item btn btn-success btn-sm save-btn">保存</button>
+                                <button class="join-item btn btn-primary btn-sm cancel-btn">取消</button>
+                                <button class="join-item btn btn-info btn-sm qr-btn">二维码</button>
                             </div>
                         `;
 
                         // 重新绑定事件监听器
-                        const [saveBtn, cancelBtn, qrBtn] = actionsCell.querySelectorAll('button');
+                        const saveBtn = actionsCell.querySelector('.save-btn');
+                        const cancelBtn = actionsCell.querySelector('.cancel-btn');
+                        const qrBtn = actionsCell.querySelector('.qr-btn');
+                        
+                        const originalData = JSON.parse(row.dataset.originalData);
+                        
                         saveBtn.onclick = () => saveEdit(row);
                         cancelBtn.onclick = () => restoreRow(row);
                         qrBtn.onclick = () => {
@@ -1557,6 +4480,44 @@
                         row.classList.remove('editing');
                     }
                 }
+            }
+
+            async function restoreRow(row) {
+                const cells = row.cells;
+
+                // 恢复按钮组
+                const actionsCell = cells[7];
+                actionsCell.innerHTML = `
+                    <div class="join">
+                        <button class="join-item btn btn-warning btn-sm edit-btn">编辑</button>
+                        <button class="join-item btn btn-error btn-sm delete-btn">删除</button>
+                        <button class="join-item btn btn-info btn-sm qr-btn">二维码</button>
+                    </div>
+                `;
+
+                // 重新绑定事件监听器
+                const editBtn = actionsCell.querySelector('.edit-btn');
+                const deleteBtn = actionsCell.querySelector('.delete-btn');
+                const qrBtn = actionsCell.querySelector('.qr-btn');
+                
+                const originalData = JSON.parse(row.dataset.originalData);
+                
+                editBtn.onclick = () => toggleEditMode(row);
+                deleteBtn.onclick = () => deleteMapping(originalData.path);
+                qrBtn.onclick = () => {
+                    // 获取当前行的完整数据
+                    fetch(`/api/mapping?path=${originalData.path}`)
+                        .then(response => response.json())
+                        .then(mappingData => {
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, mappingData);
+                        })
+                        .catch(error => {
+                            console.error('获取数据失败:', error);
+                            generateQRForMapping(window.location.origin + '/' + originalData.path, originalData.path, {});
+                        });
+                };
+
+                row.classList.remove('editing');
             }
 
             async function saveEdit(row) {
@@ -1611,7 +4572,7 @@
                             address: newAddress,
                             expiry: newExpiry || null,
                             enabled: newEnabled,
-                            isWechat: newIsWechat,
+                            isWechat: newIschat,
                             qrCodeData: serverData.qrCodeData // 使用服务器返回的原始二维码数据
                         })
                     });
@@ -1621,6 +4582,27 @@
                         showAlert(data.message || data.error || '更新失败，请重试');
                         return;
                     }
+
+                    // 更新localStorage中的映射数据
+                    // 如果路径改变了，需要删除旧的并添加新的
+                    if (newPath !== rowOriginalData.path) {
+                        updateLocalStorageMappings({
+                            [rowOriginalData.path]: null
+                        }, 'delete');
+                    }
+                    
+                    updateLocalStorageMappings({
+                        [newPath]: {
+                            name: newName,
+                            manicureName: newManicureName,
+                            target: newTarget,
+                            address: newAddress,
+                            expiry: newExpiry || null,
+                            enabled: newEnabled,
+                            isWechat: newIsWechat,
+                            qrCodeData: serverData.qrCodeData
+                        }
+                    }, 'add');
 
                     showAlert('更新成功', 'success');
                     
@@ -1844,6 +4826,42 @@
                 }
             }
 
+            // 添加更新localStorage映射数据的函数
+            function updateLocalStorageMappings(newMappings, operation = 'add') {
+                try {
+                    // 获取现有的映射数据
+                    let mappings = {};
+                    const existingData = localStorage.getItem('qrcode_mappings');
+                    if (existingData) {
+                        mappings = JSON.parse(existingData);
+                    }
+
+                    // 根据操作类型更新映射数据
+                    switch (operation) {
+                        case 'add':
+                        case 'update':
+                            // 添加或更新映射
+                            Object.assign(mappings, newMappings);
+                            break;
+                        case 'delete':
+                            // 删除映射
+                            Object.keys(newMappings).forEach(key => {
+                                delete mappings[key];
+                            });
+                            break;
+                        case 'replace':
+                            // 替换所有映射
+                            mappings = newMappings;
+                            break;
+                    }
+
+                    // 保存更新后的映射数据
+                    localStorage.setItem('qrcode_mappings', JSON.stringify(mappings));
+                } catch (error) {
+                    console.error('更新localStorage映射数据失败:', error);
+                }
+            }
+
             // 添加加载即将过期映射的函数
             async function loadExpiringMappings(type) {
                 const tableBody = document.getElementById('mappingsTableBody');
@@ -2009,4 +5027,5 @@
     </script>
 </body>
 
+</html>
 </html>
